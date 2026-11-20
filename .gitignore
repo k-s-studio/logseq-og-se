@@ -63,3 +63,6 @@ deps/shui/.lsp
 deps/shui/.lsp-cache
 deps/shui/.clj-kondo
 deps/shui/shui-graph/logseq/bak
+
+# Personal workspace instructions, kept out of version control
+/CLAUDE.md
