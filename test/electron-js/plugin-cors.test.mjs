@@ -188,7 +188,7 @@ describe('isRelaxablePluginRequest', () => {
 })
 
 describe('pluginRootsFromPreferences', () => {
-  const DOT = path.resolve('/home/u/.logseq-og')
+  const DOT = path.resolve('/home/u/.logseq-og-se')
 
   test('always includes the dot-root tmp dir, where generated entries are written', () => {
     // A non-dot-root plugin whose package main is a .js file gets an entry

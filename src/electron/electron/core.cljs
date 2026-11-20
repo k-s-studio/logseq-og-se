@@ -24,7 +24,7 @@
             [logseq.publishing.export :as publish-export]))
 
 ;; Keep same as main/frontend.util.url
-(defonce LSP_SCHEME "logseq-og")
+(defonce LSP_SCHEME "logseq-og-se")
 (defonce FILE_LSP_SCHEME "lsp")
 (defonce FILE_ASSETS_SCHEME "assets")
 (defonce LSP_PROTOCOL (str FILE_LSP_SCHEME "://"))
@@ -245,7 +245,7 @@
 
 (defn- set-app-menu! []
   (let [about-fn (fn []
-                   (.showMessageBox dialog (clj->js {:title "Logseq OG"
+                   (.showMessageBox dialog (clj->js {:title "Logseq OG SE"
                                                      :icon (node-path/join js/__dirname "icons/logseq.png")
                                                      :message (str "Version " updater/electron-version)})))
         template (if mac?

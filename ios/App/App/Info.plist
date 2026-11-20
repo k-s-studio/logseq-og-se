@@ -38,7 +38,7 @@
 			<string>com.logseq.og</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>logseq-og</string>
+				<string>logseq-og-se</string>
 			</array>
 		</dict>
 	</array>

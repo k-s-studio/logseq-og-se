@@ -23,9 +23,9 @@ npx electron-forge make --targets "@electron-forge/maker-squirrel,@electron-forg
 
 ## 產出
 產出在 `static/out/make/`：
-- `squirrel.windows/x64/Logseq-OG-<ver> Setup.exe`（安裝檔）
-- `zip/win32/x64/Logseq-OG-win32-x64-<ver>.zip`（免安裝版，已驗證可執行）
-- 解壓前的 App：`static/out/Logseq-OG-win32-x64/`
+- `squirrel.windows/x64/Logseq-OG-SE-<ver> Setup.exe`（安裝檔）
+- `zip/win32/x64/Logseq-OG-SE-win32-x64-<ver>.zip`（免安裝版，已驗證可執行）
+- 解壓前的 App：`static/out/Logseq-OG-SE-win32-x64/`
 
 版本號來自 `src/main/frontend/version.cljs`。原版 `gulp electronMaker` 會把它寫進 `static/package.json`；手動流程若改了版本號，要自己同步。
 
@@ -36,4 +36,4 @@ npx electron-forge make --targets "@electron-forge/maker-squirrel,@electron-forg
 - **`gulp build` 會清空 `static/`**：只保留 `static/node_modules` 和 `static/yarn.lock`，**連前一次的打包產出 `static/out/` 也會刪掉**，要保留的安裝檔請先移到別處。
 - **Node 24 下 forge make 會無聲結束**：解壓 Electron zip 時，extract-zip 2.0.1 的 Promise 永遠不會 resolve，程序 exit 0、沒有產出。看到「Finalizing package」後就結束、而且沒有 `static/out`，就是這個問題 → 改用 Node 22。排查用 `$env:DEBUG="electron-packager,electron-forge:*"`
 - `static/` 執行 `yarn install` 時 `@bitdisaster/exe-icon-extractor` 編譯失敗（C2664）：它是 `electron-wix-msi` 的選用依賴，只影響 msi，可以忽略。
-- 打包後若 App 內 git 無法運作，先確認 `static/out/Logseq-OG-win32-x64/resources/app/node_modules/dugite/git/cmd/git.exe` 存在。
+- 打包後若 App 內 git 無法運作，先確認 `static/out/Logseq-OG-SE-win32-x64/resources/app/node_modules/dugite/git/cmd/git.exe` 存在。
