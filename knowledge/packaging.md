@@ -27,7 +27,21 @@ npx electron-forge make --targets "@electron-forge/maker-squirrel,@electron-forg
 - `zip/win32/x64/Logseq-OG-SE-win32-x64-<ver>.zip`（免安裝版，已驗證可執行）
 - 解壓前的 App：`static/out/Logseq-OG-SE-win32-x64/`
 
-版本號來自 `src/main/frontend/version.cljs`。原版 `gulp electronMaker` 會把它寫進 `static/package.json`；手動流程若改了版本號，要自己同步。
+## 版本號（手動維護）
+沒有任何機制會自動遞增版本號。基準值是 `src/main/frontend/version.cljs` 的 `(defonce version "x.y.z")`，**升版時手動改兩處，兩處必須一致**，然後重編 cljs（版本號是編進程式碼的）：
+- `src/main/frontend/version.cljs`：App 內顯示的版本，也是更新檢查拿去比較的本機版本
+- `resources/package.json` 的 `version`：決定安裝檔、nupkg、exe 的版本。`gulp build` 會把它複製成 `static/package.json`，直接改 `static/` 的那份會在下次 `gulp build` 被清掉
+
+只改一處的後果：只改 `package.json` → 安裝檔是新版號、App 內顯示舊版；只改 `version.cljs` → 相反。
+
+不用改：根目錄 `package.json`（打包不讀它）、Android／iOS 的版本欄位（只有行動端用）。
+
+原版 `gulp electronMaker` 會自動把 `version.cljs` 寫進 `static/package.json`，但本流程拆開跑 `gulp:build` + `cljs:release-electron` + `forge make`，沒有經過它，所以要自己同步。
+
+## 更新來源
+更新檢查指向本 repo（`k-s-studio/logseq-og-se`）的 GitHub Releases，**共四處須一致**：`src/electron/electron/core.cljs` 的 `:repo`（手動檢查與啟動時預檢）、`resources/package.json` 的 `repository`（`update-electron-app` 讀它）、`resources/forge.config.js` 的 `publisher-github`、`settings.cljs` 裡的 Releases 連結。
+
+`update.electronjs.org` 官方文件載明：repo 必須公開；Windows 資產須為 `.zip` 或 `.exe`，檔名含 `-win32` 與架構（如 `-x64`）。**未載明、尚待實測**：是否忽略 pre-release（forge 的 `publisher-github` 設了 `prerelease: true`）、是否需要 `RELEASES`／`nupkg`、沒有 Release 時回傳什麼狀態碼。
 
 ## 不要碰的指令（其他平台）
 `release-app`、`run-android-release`、`run-ios-release`、`ios:dev`、`android:dev`、`npx cap ...`

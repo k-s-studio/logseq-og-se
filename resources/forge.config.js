@@ -98,8 +98,8 @@ module.exports = {
       name: '@electron-forge/publisher-github',
       config: {
         repository: {
-          owner: 'logseq',
-          name: 'og'
+          owner: 'k-s-studio',
+          name: 'logseq-og-se'
         },
         prerelease: true
       }
