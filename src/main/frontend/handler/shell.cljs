@@ -74,8 +74,9 @@
 
 (defn set-git-username-and-email
   [username email]
-  (p/let [_r1 (run-git-command! ["config" "--global" "user.name" username])
-          _r2 (run-git-command! ["config" "--global" "user.email" email])]
+  ;; --local writes the bound repo's config, never the user's global one.
+  (p/let [_r1 (run-git-command! ["config" "--local" "user.name" username])
+          _r2 (run-git-command! ["config" "--local" "user.email" email])]
     (state/close-modal!)
     (notification/show!
      [:div "git config successfully!"]

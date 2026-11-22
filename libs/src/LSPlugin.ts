@@ -442,7 +442,8 @@ export interface IAppProxy {
 
   /**
    * @deprecated Using `logseq.Git.execCommand`
-   * @link https://github.com/desktop/dugite/blob/master/docs/api/exec.md
+   * Runs the system git against the current graph's ref (refs/logseq-og-se/<name>)
+   * in the repo bound in Settings > Version control.
    * @param args
    */
   execGitCommand: (args: string[]) => Promise<string>
@@ -861,7 +862,8 @@ export interface IDBProxy {
 export interface IGitProxy {
   /**
    * @added 0.0.2
-   * @link https://github.com/desktop/dugite/blob/master/docs/api/exec.md
+   * Runs the system git against the current graph's ref (refs/logseq-og-se/<name>)
+   * in the repo bound in Settings > Version control.
    * @param args
    */
   execCommand: (args: string[]) => Promise<IGitResult>

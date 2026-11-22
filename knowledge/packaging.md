@@ -16,7 +16,6 @@ yarn gulp:build
 yarn cljs:release-electron         # 約 7 分鐘
 cd static
 yarn install                       # 首次或 resources/package.json 變更時
-cd node_modules/dugite; yarn run postinstall; cd ../..   # 下載 dugite 自帶的 git.exe
 # 以下要先切 Node 22（見上方）
 npx electron-forge make --targets "@electron-forge/maker-squirrel,@electron-forge/maker-zip"
 ```
@@ -50,4 +49,4 @@ npx electron-forge make --targets "@electron-forge/maker-squirrel,@electron-forg
 - **`gulp build` 會清空 `static/`**：只保留 `static/node_modules` 和 `static/yarn.lock`，**連前一次的打包產出 `static/out/` 也會刪掉**，要保留的安裝檔請先移到別處。
 - **Node 24 下 forge make 會無聲結束**：解壓 Electron zip 時，extract-zip 2.0.1 的 Promise 永遠不會 resolve，程序 exit 0、沒有產出。看到「Finalizing package」後就結束、而且沒有 `static/out`，就是這個問題 → 改用 Node 22。排查用 `$env:DEBUG="electron-packager,electron-forge:*"`
 - `static/` 執行 `yarn install` 時 `@bitdisaster/exe-icon-extractor` 編譯失敗（C2664）：它是 `electron-wix-msi` 的選用依賴，只影響 msi，可以忽略。
-- 打包後若 App 內 git 無法運作，先確認 `static/out/Logseq-OG-SE-win32-x64/resources/app/node_modules/dugite/git/cmd/git.exe` 存在。
+- App 不自帶 git，用的是 PATH 上的 `git`（需 2.31 以上）；App 內 git 無法運作時，先確認在終端機執行 `git --version` 有結果。

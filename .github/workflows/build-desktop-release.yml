@@ -254,10 +254,6 @@ jobs:
         run: yarn install
         working-directory: ./static
 
-      - name: Fix Deps Electron app
-        run: yarn run postinstall
-        working-directory: ./static/node_modules/dugite/
-
       # Same targets as knowledge/packaging.md: Squirrel installer + zip, no WiX maker (no .msi)
       - name: Build/Release Electron app
         run: npx electron-forge make --targets "@electron-forge/maker-squirrel,@electron-forge/maker-zip"

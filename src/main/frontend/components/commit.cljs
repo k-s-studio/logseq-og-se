@@ -38,10 +38,13 @@
 
 (rum/defcs add-commit-message < rum/reactive
   (rum/local nil ::git-status)
+  (rum/local nil ::git-error)
   {:will-mount (fn [state]
                  (-> (ipc/ipc "gitStatus" (state/get-current-repo))
                      (p/then (fn [status]
-                               (reset! (get state ::git-status) status))))
+                               (reset! (get state ::git-status) status)))
+                     (p/catch (fn [error]
+                                (reset! (get state ::git-error) (str error)))))
                  state)
    :did-update (fn [state]
                  (when-let [input (gdom/getElement "commit-message")]
@@ -55,9 +58,19 @@
                       :on-enter (fn []
                                   (commit-all!)))))
   [state _close-fn]
-  (let [*git-status (get state ::git-status)]
+  (let [*git-status (get state ::git-status)
+        git-error @(get state ::git-error)]
     [:div.w-full.mx-auto
-     (if (empty? @*git-status)
+     (cond
+       git-error
+       [:<>
+        [:div.mb-2 git-error]
+        [:div.mt-5.sm:mt-4.flex
+         (ui/button
+          {:on-click state/close-modal!}
+           "Close")]]
+
+       (empty? @*git-status)
        [:<>
         [:div.sm:flex.sm:items-start
          [:div.mt-3.text-center.sm:mt-0.sm:text-left.mb-2
@@ -68,6 +81,7 @@
           {:on-click state/close-modal!}
            "Close")]]
 
+       :else
        [:<>
         [:div.sm:flex.sm:items-start
          [:div.mt-3.text-center.sm:mt-0.sm:text-left.mb-2

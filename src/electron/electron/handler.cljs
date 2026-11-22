@@ -516,8 +516,19 @@
 
 (defmethod handle :runGitWithinCurrentGraph [_ [_ {:keys [repo command]}]]
   (when (seq command)
-    (git/init! (utils/get-graph-dir repo))
     (git/run-git2! (utils/get-graph-dir repo) (clj->js command))))
+
+(defmethod handle :gitBinding [_ [_ repo]]
+  (when-let [graph-path (utils/get-graph-dir repo)]
+    (git/get-binding graph-path)))
+
+(defmethod handle :gitBind [_ [_ repo opts]]
+  (p/let [result (git/bind! (utils/get-graph-dir repo) opts)]
+    (bean/->js result)))
+
+(defmethod handle :gitUnbind [_ [_ repo]]
+  (when-let [graph-path (utils/get-graph-dir repo)]
+    (git/unbind! graph-path)))
 
 (defmethod handle :runCli [window [_ {:keys [command args returnResult]}]]
   (try

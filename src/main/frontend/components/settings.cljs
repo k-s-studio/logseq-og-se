@@ -763,9 +763,95 @@
      (enable-all-pages-public-row t enable-all-pages-public?)
      (auto-push-row t current-repo enable-git-auto-push?)]))
 
+(defn- load-git-binding!
+  [*binding *form repo]
+  (p/let [result (ipc/ipc :gitBinding repo)
+          result (js->clj result :keywordize-keys true)]
+    (reset! *binding result)
+    (reset! *form {:repo "" :ref (:suggested-ref result) :errors nil})))
+
+(rum/defcs git-binding-row < rum/reactive
+  (rum/local nil ::binding)
+  (rum/local nil ::form)
+  {:will-mount (fn [state]
+                 (load-git-binding! (::binding state) (::form state) (state/get-current-repo))
+                 state)}
+  [state t]
+  (let [repo (state/get-current-repo)
+        *binding (::binding state)
+        *form (::form state)
+        {:keys [ref repo-path] :as binding} @*binding
+        {:keys [errors] :as form} @*form
+        error-text (fn [k] (when-let [e (get errors k)]
+                             [:div.text-sm.text-red-500.mt-1 e]))
+        bind! (fn []
+                (p/let [result (ipc/ipc :gitBind repo (select-keys @*form [:repo :ref]))
+                        result (js->clj result :keywordize-keys true)]
+                  (if (:ok result)
+                    (do
+                      (doseq [w (:warnings result)]
+                        (notification/show! w :warning false))
+                      (load-git-binding! *binding *form repo))
+                    (swap! *form assoc :errors (:errors result)))))]
+    ;; Block layout on purpose: the panel's `.it label + div` rule would turn
+    ;; this form into a single flex row.
+    [:div.it {:style {:display "block"}}
+     [:div.text-sm.font-medium.leading-5.opacity-70.mb-1
+      (t :settings-page/git-binding)]
+     [:div
+      [:div.text-sm.opacity-50.mb-3 (t :settings-page/git-binding-desc)]
+      (cond
+        (nil? binding)
+        nil
+
+        ref
+        [:div.flex.flex-col.gap-1.text-sm
+         [:div [:span.opacity-70 (t :settings-page/git-binding-repo) ": "] [:code repo-path]]
+         [:div [:span.opacity-70 (t :settings-page/git-binding-ref) ": "] [:code (str "refs/logseq-og-se/" ref)]]
+         [:div.mt-2
+          (shui-ui/button
+           {:size :sm :variant :outline
+            :on-click (fn []
+                        (when (js/confirm (t :settings-page/git-binding-unbind-confirm))
+                          (p/do!
+                           (ipc/ipc :gitUnbind repo)
+                           (load-git-binding! *binding *form repo))))}
+           (t :settings-page/git-binding-unbind))]]
+
+        :else
+        [:div.flex.flex-col.gap-2.max-w-lg
+         [:div
+          [:div.text-sm.opacity-70.mb-1 (t :settings-page/git-binding-repo)]
+          [:div.flex.gap-2.items-center
+           [:input.form-input.is-small.flex-1
+            {:style {:max-width "none"}
+             :value (:repo form)
+             :on-change #(swap! *form assoc :repo (util/evalue %))}]
+           (shui-ui/button
+            {:size :sm :variant :outline
+             :on-click (fn []
+                         (p/let [dir (ipc/ipc :openDialog)]
+                           (when (string? dir)
+                             (swap! *form assoc :repo dir))))}
+            (t :settings-page/git-binding-browse))]
+          (error-text :repo)]
+         [:div
+          [:div.text-sm.opacity-70.mb-1 (t :settings-page/git-binding-ref)]
+          [:div.flex.gap-1.items-center
+           [:code.text-sm.whitespace-nowrap "refs/logseq-og-se/"]
+           [:input.form-input.is-small.flex-1
+            {:style {:max-width "none"}
+             :value (:ref form)
+             :on-change #(swap! *form assoc :ref (util/evalue %))}]]
+          (error-text :ref)]
+         [:div
+          (shui-ui/button {:size :sm :on-click bind!}
+                          (t :settings-page/git-binding-bind))]])]]))
+
 (rum/defc settings-git
   []
   [:div.panel-wrap
+   (git-binding-row t)
    [:div.text-sm.my-4
     (ui/admonition
      :tip
