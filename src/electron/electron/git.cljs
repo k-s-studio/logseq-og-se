@@ -152,13 +152,6 @@
 ;; ---------------------------------------------------------------------------
 ;; Public commands
 
-(defn run-git!
-  "Runs `args` against the graph's ref. Resolves stdout, rejects stderr."
-  [graph-path args]
-  (if-let [ctx (resolve-context graph-path)]
-    (p/let [ctx ctx] (run-in-context! ctx args))
-    (p/rejected not-bound-error)))
-
 (defn run-git2!
   "Runs `args` against the graph's ref. Resolves {stdout, stderr, exitCode}
   for the plugin API; an unbound graph or a missing git is reported the same
