@@ -149,7 +149,7 @@
  :settings-page/git-binding-bind "綁定"
  :settings-page/git-binding-unbind "解除綁定"
  :git-sync/commit "立即提交"
- :git-sync/push "Push"
+ :git-sync/push "Push（推送）"
  :git-sync/pull "Pull（rebase）"
  :git-sync/remote "遠端"
  :git-sync/no-remotes "此儲藏庫沒有設定遠端。"
