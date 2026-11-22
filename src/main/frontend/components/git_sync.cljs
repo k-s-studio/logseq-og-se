@@ -11,7 +11,7 @@
             [rum.core :as rum]))
 
 (defn- message
-  ;; Literal (t :key) calls: the translation lint greps for them.
+  ;; Keep each translation call literal: the translation lint greps for them.
   [code]
   (case code
     :committed          (t :git-sync/committed)
