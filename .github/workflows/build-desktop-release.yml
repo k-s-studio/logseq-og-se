@@ -55,12 +55,12 @@ jobs:
       #     exit 1
 
       - name: Check out Git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.inputs.git-ref }}
 
       - name: Install Node.js, NPM and Yarn
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -69,7 +69,7 @@ jobs:
         run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
 
       - name: Cache yarn cache directory
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         id: yarn-cache
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
@@ -78,13 +78,13 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Setup Java JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Cache clojure deps
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.m2/repository
@@ -92,7 +92,7 @@ jobs:
           key: ${{ runner.os }}-clojure-lib-${{ hashFiles('**/deps.edn') }}
 
       - name: Setup clojure
-        uses: DeLaGuardo/setup-clojure@10.1
+        uses: DeLaGuardo/setup-clojure@13.7.0
         with:
           cli: ${{ env.CLOJURE_VERSION }}
 
@@ -140,7 +140,7 @@ jobs:
         working-directory: ./static
 
       - name: Cache Static File
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: static
           path: static
@@ -154,16 +154,16 @@ jobs:
     needs: [ compile-cljs ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download The Static Asset
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: static
           path: static
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
@@ -206,7 +206,7 @@ jobs:
     needs: [ compile-cljs ]
     steps:
       - name: Download The Static Asset
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: static
           path: static
@@ -216,12 +216,12 @@ jobs:
         run: echo "version=$(cat ./static/VERSION)" >> $env:GITHUB_OUTPUT
 
       - name: Install Node.js, NPM and Yarn
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Install Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.11'
 
@@ -244,7 +244,7 @@ jobs:
           }
 
       # - name: Cache Node Modules
-      #   uses: actions/cache@v4
+      #   uses: actions/cache@v6
       #   with:
       #    path: |
       #      **/node_modules
@@ -272,7 +272,7 @@ jobs:
           mv static\out\make\squirrel.windows\x64\RELEASES builds\RELEASES
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: logseq-og-se-win64-builds
           path: builds
@@ -284,7 +284,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download The Windows Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: logseq-og-se-win64-builds
           path: ./
@@ -309,7 +309,7 @@ jobs:
           cat SHA256SUMS.txt
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
