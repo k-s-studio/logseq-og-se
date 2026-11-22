@@ -42,12 +42,13 @@
   "Runs the system git. Resolves a JS object {stdout, stderr, exitCode} for any
   exit code (the same contract dugite had) and rejects only when git cannot be
   started or its output cannot be collected."
-  [args cwd]
+  [args cwd & [env]]
   (p/create
    (fn [resolve reject]
      (child-process/execFile
       "git" (clj->js args)
-      #js {:cwd cwd :maxBuffer js/Infinity :windowsHide true :encoding "utf8"}
+      #js {:cwd cwd :maxBuffer js/Infinity :windowsHide true :encoding "utf8"
+           :env (js/Object.assign #js {} js/process.env (clj->js env))}
       (fn [^js err stdout stderr]
         (cond
           (nil? err)
@@ -78,8 +79,9 @@
   (node-path/join graph-path binding-rpath))
 
 (defn read-binding
-  "Returns {:repo :ref} from the graph's binding file, or nil. :repo is relative
-  to the graph when the graph sits inside the repo, absolute otherwise."
+  "Returns {:repo :ref :remote} from the graph's binding file, or nil. :repo is
+  relative to the graph when the graph sits inside the repo, absolute
+  otherwise. :remote is the last remote pushed to or pulled from."
   [graph-path]
   (try
     (let [f (binding-file graph-path)]
@@ -88,7 +90,7 @@
           (when (and (map? m)
                      (string? (:repo m)) (not (string/blank? (:repo m)))
                      (string? (:ref m)) (not (string/blank? (:ref m))))
-            (select-keys m [:repo :ref])))))
+            (select-keys m [:repo :ref :remote])))))
     (catch :default e
       (log-error "Invalid binding file" e)
       nil)))
@@ -177,14 +179,38 @@
    ;; In case the repo's exclude entry was removed by hand.
    (run-in-context! ctx ["rm" "-q" "--cached" "--ignore-unmatch" "--" binding-rpath])))
 
+(def default-commit-message "Auto saved by Logseq")
+
+(defonce ^:private *queues (atom {}))
+
+(defn- serialized!
+  "Runs `f` (returning a promise) after every earlier serialized call for the
+  same graph has settled, so an auto commit never races a pull or push for
+  the index lock."
+  [graph-path f]
+  (let [prev (get @*queues graph-path (p/resolved nil))
+        run (-> prev
+                (p/catch (constantly nil))
+                (p/then (fn [_] (f))))]
+    (swap! *queues assoc graph-path (p/catch run (constantly nil)))
+    run))
+
+(defn- commit-in-context!
+  "Stages everything and commits when something changed. Resolves true when
+  a commit was made."
+  [ctx message]
+  (p/let [_ (add-all! ctx)
+          status (run-in-context! ctx ["status" "--porcelain"])]
+    (if (string/blank? status)
+      false
+      (p/let [_ (run-in-context! ctx ["commit" "-q" "-m" message])]
+        true))))
+
 (defn- commit-graph!
   [graph-path message]
   (when-let [ctx (resolve-context graph-path)]
-    (p/let [ctx ctx
-            _ (add-all! ctx)
-            status (run-in-context! ctx ["status" "--porcelain"])]
-      (when-not (string/blank? status)
-        (run-in-context! ctx ["commit" "-q" "-m" message])))))
+    (serialized! graph-path
+                 (fn [] (p/let [ctx ctx] (commit-in-context! ctx message))))))
 
 (defn- notify-graph!
   [graph-path kind payload]
@@ -195,7 +221,7 @@
 (defn add-all-and-commit-single-graph!
   [graph-path message]
   (let [message (if (string/blank? message)
-                  "Auto saved by Logseq"
+                  default-commit-message
                   message)]
     (-> (commit-graph! graph-path message)
         (p/catch (fn [error]
@@ -417,6 +443,153 @@
     (when (fs/existsSync f)
       (fs/unlinkSync f))
     true))
+
+;; ---------------------------------------------------------------------------
+;; Toolbar: commit now, push, pull
+;;
+;; Results are {:ok bool :code keyword :detail string}; the renderer turns the
+;; code into a localized message.
+
+(def ^:private network-env
+  ;; Never wait for a terminal prompt nobody can answer; credential helpers
+  ;; with their own UI still work.
+  {"GIT_TERMINAL_PROMPT" "0"})
+
+(defn- list-remotes
+  [ctx]
+  (p/let [out (run-in-context! ctx ["remote"])]
+    (->> (string/split-lines out) (map string/trim) (remove string/blank?) vec)))
+
+(defn- error-result
+  [e]
+  (let [e (str e)]
+    (if (string/includes? e "Author identity unknown")
+      {:ok false :code :identity-unknown}
+      {:ok false :code :error :detail e})))
+
+(defn- with-context
+  "Runs (f ctx) for a bound graph, or resolves the :not-bound result."
+  [graph-path f]
+  (if-let [ctx (resolve-context graph-path)]
+    (-> (p/let [ctx ctx] (f ctx))
+        (p/catch error-result))
+    (p/resolved {:ok false :code :not-bound})))
+
+(defn sync-info
+  "What the toolbar menu needs: the ref, the repo's remotes and the remembered
+  one (falling back to origin, then the first remote)."
+  [graph-path]
+  (with-context graph-path
+    (fn [ctx]
+      (p/let [remotes (list-remotes ctx)
+              saved (:remote (read-binding graph-path))
+              remote (or (some #{saved} remotes)
+                         (some #{"origin"} remotes)
+                         (first remotes))]
+        {:ok true :ref (:ref ctx) :remotes remotes :remote remote}))))
+
+(defn set-remote!
+  "Remembers `remote` in the graph's binding file."
+  [graph-path remote]
+  (when-let [b (read-binding graph-path)]
+    (when (and (string? remote) (not (string/blank? remote)) (not= remote (:remote b)))
+      (write-binding! graph-path (assoc b :remote remote))))
+  true)
+
+(defn commit-now!
+  [graph-path]
+  (with-context graph-path
+    (fn [ctx]
+      (serialized! graph-path
+                   (fn []
+                     (p/let [committed? (commit-in-context! ctx default-commit-message)]
+                       {:ok true :code (if committed? :committed :no-changes)}))))))
+
+(defn- with-remote
+  "Checks that `remote` is one of the repo's remotes and remembers it."
+  [graph-path ctx remote f]
+  (p/let [remotes (list-remotes ctx)]
+    (if-not (some #{remote} remotes)
+      {:ok false :code :no-remote}
+      (do (set-remote! graph-path remote)
+          (f (str ref-namespace (:ref ctx)))))))
+
+(defn push!
+  [graph-path remote]
+  (with-context graph-path
+    (fn [ctx]
+      (serialized! graph-path
+                   (fn []
+                     (with-remote graph-path ctx remote
+                       (fn [full-ref]
+                         (p/let [^js r (exec (context-args ctx ["push" "--porcelain" remote (str full-ref ":" full-ref)])
+                                             graph-path network-env)
+                                 out (.-stdout r)]
+                           (cond
+                             (zero? (.-exitCode r))
+                             {:ok true :code (if (string/includes? out "[up to date]") :push-up-to-date :pushed)}
+
+                             ;; Porcelain flags a refused update with "!".
+                             (some #(string/starts-with? % "!") (string/split-lines out))
+                             {:ok false :code :push-rejected}
+
+                             :else
+                             {:ok false :code :error :detail (string/trim (str (.-stderr r) "\n" out))})))))))))
+
+(defn- rebase-in-progress?
+  [{:keys [git-dir]}]
+  (or (fs/existsSync (node-path/join git-dir "rebase-merge"))
+      (fs/existsSync (node-path/join git-dir "rebase-apply"))))
+
+(defn- union-attributes-file
+  "An attributes file that makes every text merge keep both sides' lines.
+  Passed only to the pull, so the repo's own attributes are untouched."
+  [{:keys [git-dir]}]
+  (let [f (node-path/join git-dir "union-attributes")]
+    (write-if-changed! f "* merge=union\n")
+    f))
+
+(defn pull!
+  "Commits pending changes, then rebases the graph's ref onto the remote's.
+  Text conflicts keep both sides; anything else (binary files, delete vs
+  modify) aborts the rebase and reports the files."
+  [graph-path remote]
+  (with-context graph-path
+    (fn [ctx]
+      (serialized! graph-path
+                   (fn []
+                     (with-remote graph-path ctx remote
+                       (fn [full-ref]
+                         (p/let [^js ls (exec (context-args ctx ["ls-remote" "--exit-code" remote full-ref])
+                                              graph-path network-env)]
+                           (case (.-exitCode ls)
+                             0
+                             (p/let [_ (commit-in-context! ctx default-commit-message)
+                                     before (-> (run-in-context! ctx ["rev-parse" "-q" "--verify" "HEAD"])
+                                                (p/catch (constantly nil)))
+                                     ^js r (exec (context-args ctx ["-c" (str "core.attributesFile=" (union-attributes-file ctx))
+                                                                    "pull" "--rebase" "--no-autostash" remote full-ref])
+                                                 graph-path network-env)]
+                               (cond
+                                 (zero? (.-exitCode r))
+                                 (p/let [after (run-in-context! ctx ["rev-parse" "HEAD"])]
+                                   {:ok true :code (if (= (some-> before string/trim) (string/trim after))
+                                                     :pull-up-to-date
+                                                     :pulled)})
+
+                                 (rebase-in-progress? ctx)
+                                 (p/let [files (-> (run-in-context! ctx ["diff" "--name-only" "--diff-filter=U"])
+                                                   (p/catch (constantly "")))
+                                         _ (run-in-context! ctx ["rebase" "--abort"])]
+                                   {:ok false :code :pull-conflict :detail (string/trim files)})
+
+                                 :else
+                                 {:ok false :code :error :detail (string/trim (.-stderr r))}))
+
+                             2
+                             {:ok false :code :remote-ref-missing}
+
+                             {:ok false :code :error :detail (string/trim (.-stderr ls))})))))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Auto commit

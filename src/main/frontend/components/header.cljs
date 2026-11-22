@@ -11,6 +11,7 @@
             [frontend.handler :as handler]
             [frontend.handler.file-sync :as file-sync-handler]
             [frontend.components.file-sync :as fs-sync]
+            [frontend.components.git-sync :as git-sync]
             [frontend.handler.plugin :as plugin-handler]
             [frontend.handler.route :as route-handler]
             [frontend.handler.user :as user-handler]
@@ -257,6 +258,12 @@
         [:<>
          (plugins/hook-ui-items :toolbar)
          (plugins/updates-notifications)])
+
+      (when (and (util/electron?)
+                 current-repo
+                 (config/local-db? current-repo)
+                 (not (config/demo-graph? current-repo)))
+        (rum/with-key (git-sync/git-sync-menu current-repo) "git-sync-menu"))
 
       (when (state/feature-http-server-enabled?)
         (server/server-indicator (state/sub :electron/server)))

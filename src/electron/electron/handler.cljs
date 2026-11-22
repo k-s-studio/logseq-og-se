@@ -526,6 +526,26 @@
   (p/let [result (git/bind! (utils/get-graph-dir repo) opts)]
     (bean/->js result)))
 
+(defn- git-result
+  [graph-name f]
+  (p/let [result (f (utils/get-graph-dir graph-name))]
+    (bean/->js result)))
+
+(defmethod handle :gitSyncInfo [_ [_ repo]]
+  (git-result repo git/sync-info))
+
+(defmethod handle :gitCommitNow [_ [_ repo]]
+  (git-result repo git/commit-now!))
+
+(defmethod handle :gitPush [_ [_ repo remote]]
+  (git-result repo #(git/push! % remote)))
+
+(defmethod handle :gitPull [_ [_ repo remote]]
+  (git-result repo #(git/pull! % remote)))
+
+(defmethod handle :gitSetRemote [_ [_ repo remote]]
+  (git/set-remote! (utils/get-graph-dir repo) remote))
+
 (defmethod handle :gitUnbind [_ [_ repo]]
   (when-let [graph-path (utils/get-graph-dir repo)]
     (git/unbind! graph-path)))
