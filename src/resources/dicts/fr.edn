@@ -758,7 +758,6 @@
     :settings-page/git-desc-1 "Pour voir l'historique des modifications d'une page, cliquez les trois…"
     :settings-page/git-desc-2 "Pour les utilisateurs professionnels, Logseq supporte aussi l'utilisation…"
     :settings-page/git-desc-3 "pour le contrôle de versions. Utilisez Git à vos propres risques…"
-    :settings-page/git-tip "Si vous avez Logseq Sync activé, vous pouvez visualiser une pa…"
     :settings-page/native-titlebar "Barre de titre native"
     :settings-page/native-titlebar-desc "Active la barre de titre native de la fenêtre sur Windows et…"
     :settings-page/preferred-outdenting-tip "Le côté gauche montre la désindentation avec les paramètres par déf…"

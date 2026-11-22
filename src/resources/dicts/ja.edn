@@ -283,7 +283,6 @@
  :context-menu/input-template-name "このテンプレートの名前は？"
  :context-menu/template-include-parent-block "テンプレートに親ブロックを含めますか？"
  :context-menu/template-exists-warning "テンプレートが既に存在します。"
- :settings-page/git-tip "Logseq Syncが有効な場合、ページの編集履歴を直接見ることができます。この節は技術に精通している人のためのものになります。"
  :settings-page/git-desc-1 "ページの編集履歴を見たい場合は、右上の端にある横向き三点ボタンをクリックし、「ページ履歴の確認」を選択してください。"
  :settings-page/git-desc-2 "玄人なユーザーには、バージョンコントロールとして"
  :settings-page/git-desc-3 " の利用も用意しています。Gitの利用はご自身の責任で行ってください。一般的なGitの問題について、Logseqチームはサポートしません。"

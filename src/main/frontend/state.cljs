@@ -630,8 +630,9 @@ Similar to re-frame subscriptions"
    (not (false? (:feature/enable-flashcards? (sub-config repo))))))
 
 (defn enable-sync?
+  "Logseq Sync is disabled in this fork; the stored switch is ignored."
   []
-  (sub :feature/enable-sync?))
+  false)
 
 (defn enable-sync-diff-merge?
   []

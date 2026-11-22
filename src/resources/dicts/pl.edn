@@ -701,7 +701,6 @@
  :settings-page/git-desc-1                        "Kliknij trzy kropki w prawym górnym rogu i wybierz \"Podgląd historii strony\", żeby zobaczyć historię edycji stron."
  :settings-page/git-desc-2                        "Dla profesjonalistów, Logseq wspiera także używanie "
  :settings-page/git-desc-3                        " do kontroli wersji. Używasz Git na własne ryzyko, ponieważ problemy z Git nie są wspierane przez zespół Logseq."
- :settings-page/git-tip                           "Jeśli synchronizacja w Logseq jest włączona, możesz zobaczyć historię edycji stron bezpośrednio. Ta sekcja jest dla znających się na technologii."
  :settings-page/login-prompt                      "Żeby zyskać dostęp do nowych funkcjonalności przed innymi, musisz mieś status Open Collective Sponsor lub Logseq Backer i musisz się zalogować."
  :settings-page/native-titlebar                   "Natywny pasek tytułu"
  :settings-page/native-titlebar-desc              "Włącza natywny pasek tytułu w Windowsie lub Linuksie"

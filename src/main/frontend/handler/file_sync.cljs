@@ -28,9 +28,9 @@
   (state/get-current-file-sync-graph-uuid))
 
 (defn enable-sync?
+  "Logseq Sync is disabled in this fork, dev builds included."
   []
-  (or (state/enable-sync?)
-      config/dev?))
+  (state/enable-sync?))
 
 (defn current-graph-sync-on?
   []

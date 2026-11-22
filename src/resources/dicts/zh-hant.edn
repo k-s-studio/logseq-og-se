@@ -140,6 +140,7 @@
  :content/click-to-edit "點擊以編輯"
  :settings-page/git-switcher-label "啟用 Git 自動提交"
  :settings-page/git-commit-delay "Git 自動提交間隔"
+ :settings-page/git-tip "頁面歷史來自綁定的 Git 儲藏庫裡此圖表的 ref，請在下方綁定儲藏庫以啟用。"
  :settings-page/git-binding "此圖表的 Git 儲藏庫"
  :settings-page/git-binding-desc "此圖表的提交會存到該儲藏庫裡專屬的 ref，不會動到儲藏庫的分支、索引與工作目錄。Push 與 pull 在工具列的 Git 選單。"
  :settings-page/git-binding-repo "Git 儲藏庫路徑"

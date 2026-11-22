@@ -652,7 +652,6 @@
  :settings-page/git-desc-3                          " para control de versiones. Usa Git bajo tu propio riesgo ya que problemas generales con Git no son respaldados por el equipo de Logseq."
  :settings-page/git-commit-on-close  "Git auto commit"
  :settings-page/git-switcher-label                  "Habilitar Git auto commit"
- :settings-page/git-tip                             "Si tienes Logseq Sync habilitado, puedes ver el historial de edición de la página directamente. Esta sección es solo para conocedores de tecnología."
  :settings-page/home-default-page                   "Establecer página de inicio"
  :settings-page/login-prompt                        "Para acceder a nuevas características antes que nadie debes ser un patrocinador de Logseq en Open Collective y después iniciar sesión."
  :settings-page/native-titlebar                     "Barra de título nativa"

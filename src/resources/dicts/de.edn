@@ -412,7 +412,6 @@
  :settings-page/git-desc-1 "Den Seitenverlauf können Sie über das Dreipunktemenu in der oberen rechten Ecke anzeigen."
  :settings-page/git-desc-2 "Für professionelle Anwender unterstützt Logseq "
  :settings-page/git-desc-3 " als Versionskontrollesystem. Verwenden Sie Git auf eigene Gefahr. Allgemeine Probleme von Git werden vom Logseq-Team nicht unterstützt."
- :settings-page/git-tip "Wenn Sie Logseq Sync verwenden, können sie die Bearbeitungsgeschichte einer Seite direkt anzeigen. This section is for tech-savvy only."
  :settings-page/native-titlebar "Native Titelleiste"
  :settings-page/native-titlebar-desc "Die klassische Titelleiste auf Windows und Linux verwenden."
  :settings-page/preferred-outdenting-tip "Linke Seite: Ausrücken mit Standardeinstellung - Rechte Seite: Ausrücken mit aktivierter Logischer Ausrückung"

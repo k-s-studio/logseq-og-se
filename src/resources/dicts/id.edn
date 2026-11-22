@@ -255,7 +255,6 @@
  :context-menu/input-template-name "Apa nama templatnya?"
  :context-menu/template-include-parent-block "Termasuk blok induk dalam templat?"
  :context-menu/template-exists-warning "Templat sudah ada!"
- :settings-page/git-tip "Jika Anda telah mengaktifkan Sinkronisasi Logseq, Anda dapat melihat riwayat oenyuntingan halaman secara langsung. Bagian ini hanya untuk yang berpengalaman dalam teknologi."
  :settings-page/git-desc-1 "Untuk melihat riwayat penyuntingan halaman, klik tiga titik horizontal di sudut kanan atas dan pilih \"Lihat riwayat halaman\"."
  :settings-page/git-desc-2 "Untuk pengguna profesional, Logseq juga mendukung penggunaan "
  :settings-page/git-desc-3 " untuk kontrol versi. Gunakan Git dengan risiko Anda sendiri karena masalah umum Git tidak didukung oleh tim Logseq."

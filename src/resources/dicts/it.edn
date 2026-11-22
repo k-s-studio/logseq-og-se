@@ -663,7 +663,6 @@
  :settings-page/git-desc-1 "Per vedere la cronologia delle pagine clicca i tre punti orizzontali in alto a destra e seleziona \"Cronologia della pagina\"."
  :settings-page/git-desc-2 "Per gli utenti professionali Logseq supporta anche "
  :settings-page/git-desc-3 " come controllo versione. Usa Git a tuo rischio. Eventuali problemi con Git non sono supportati dal team di Logseq."
- :settings-page/git-tip "Se la sincronizzazione è abilitata puoi vedere la cronologia di modifica di una pagina direttamente. Questa sezione è solo per esperti."
  :settings-page/login-prompt "Per avere accesso a nuove funzionalità prima di tutti gli altri devi essere uno sponsor di Open Collective oppure supportare Logseq, quindi devi prima accedere."
  :settings-page/native-titlebar "Barra del titolo nativa"
  :settings-page/native-titlebar-desc "Abilita la barra del titolo nativa su Windows e Linux."

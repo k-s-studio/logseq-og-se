@@ -1122,6 +1122,11 @@
              [:li "Early access to alpha/beta features"]
              [:li "Upcoming cloud-based features, including Logseq Publish"]]]]]])]]))
 
+(def ^:private logseq-sync-ui?
+  "Logseq Sync and its account login are disabled in this fork. The UI is kept
+  behind this switch rather than deleted, so the upstream code stays intact."
+  false)
+
 (rum/defc settings-features < rum/reactive
   []
   (let [current-repo (state/get-current-repo)
@@ -1153,7 +1158,7 @@
        (http-server-switcher-row))
      (flashcards-switcher-row enable-flashcards?)
      (zotero-settings-row)
-     (when-not web-platform?
+     (when (and logseq-sync-ui? (not web-platform?))
        [:div.mt-1.sm:mt-0.sm:col-span-2
         [:hr]
         (if logged-in?
@@ -1170,7 +1175,7 @@
                                               (state/pub-event! [:user/login]))})
            [:p.text-sm.opacity-50 (t :settings-page/login-prompt)]])])
 
-     (when-not web-platform?
+     (when (and logseq-sync-ui? (not web-platform?))
        [:<>
         [:div.it.sm:grid.sm:grid-cols-3.sm:gap-4.sm:items-center
          [:label.flex.font-medium.leading-5.self-start.mt-1

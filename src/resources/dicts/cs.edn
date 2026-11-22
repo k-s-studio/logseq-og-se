@@ -260,7 +260,6 @@
  :context-menu/input-template-name                 "Jak se jmenuje šablona?"
  :context-menu/template-include-parent-block       "Včetně nadřazeného bloku v šabloně?"
  :context-menu/template-exists-warning             "Šablóna už existuje!"
- :settings-page/git-tip                            "Pokud máte povolenou synchronizaci Logseq, můžete si historii úprav stránky zobrazit přímo. Tato část je určena pouze pro technicky zdatné uživatele."
  :settings-page/git-desc-1                         "Chcete-li zobrazit historii úprav stránky, klikněte na tři vodorovné tečky v pravém horním rohu a vyberte možnost „Zobrazit historii stránky“."
  :settings-page/git-desc-2                         "Pro profesionální uživatele podporuje Logseq také použití "
  :settings-page/git-desc-3                         " pro správu verzí. Používání systému Git je na vlastní nebezpečí, protože obecné záležitosti systému Git nejsou týmem Logseq podporovány."
